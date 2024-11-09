@@ -1,0 +1,59 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String         @id @default(uuid())
+  email          String         @unique
+  name           String
+  password       String
+  role           String         @default("ADMIN")
+  createdAt      DateTime       @default(now())
+  establishment  Establishment? @relation(fields: [establishmentId], references: [id])
+  establishmentId String?
+}
+
+model Establishment {
+  id              String        @id @default(uuid())
+  name            String
+  googleReviewLink String       @db.Text
+  address         String?       @db.Text
+  phone           String?
+  email           String?
+  facebookUrl     String?       @db.Text
+  instagramUrl    String?       @db.Text
+  logoUrl         String?       @db.Text
+  users           User[]
+  prizes          Prize[]
+  participants    Participant[]
+}
+
+model Prize {
+  id                String        @id @default(uuid())
+  name              String
+  quantity          Int
+  remainingQuantity Int
+  weight            Int          @default(1)
+  establishment     Establishment @relation(fields: [establishmentId], references: [id])
+  establishmentId   String
+  participants      Participant[]
+}
+
+model Participant {
+  id              String        @id @default(uuid())
+  email           String
+  phone           String?
+  participatedAt  DateTime      @default(now())
+  hasWon          Boolean       @default(false)
+  prize           Prize?        @relation(fields: [prizeId], references: [id])
+  prizeId         String?
+  prizeCode       String?
+  claimedAt       DateTime?
+  establishment   Establishment @relation(fields: [establishmentId], references: [id])
+  establishmentId String
+}
